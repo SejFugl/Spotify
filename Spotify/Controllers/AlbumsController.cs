@@ -22,41 +22,37 @@ namespace Spotify.Controllers
         }
 
         // GET: Albums
-        public async Task<IActionResult> Index(int? id, int? songId)
+        public async Task<IActionResult> Index(int? albumId, int? songId)
         {
             var viewModel = new AlbumIndexData();
             viewModel.Albums = await _context.Albums
-                .Include(a => a.Artist)
-                .Include(a => a.Genre)
-                .AsNoTracking()
-                .ToListAsync();
+                  .Include(a => a.Artist)
+                  .Include(a => a.Genre)
+                  .Include(a => a.Songs)
+                  .AsNoTracking()
+                  .OrderBy(a => a.Title)
+                  .ToListAsync();
 
-            if (id != null)
+            if (albumId != null)
             {
-                ViewData["Album"] = id.Value;
-                Album album = viewModel.Albums.Where(i => i.AlbumId == id.Value).Single();
-                viewModel.Songs = album.Songs;
-            }
-
-            if (viewModel.Songs == null)
-            {
-                viewModel.Songs = _context.Songs;
+                ViewData["AlbumID"] = albumId.Value;
+                Album album = viewModel.Albums.FirstOrDefault(
+                    a => a.AlbumId == albumId.Value);
+                if (album != null)
+                {
+                    viewModel.Songs = album.Songs;
+                }
             }
 
             if (songId != null)
             {
-                ViewData["SongId"] = songId.Value;
-                var selectedSong = viewModel.Songs.Where(x => x.SongId == songId).Single();
-                await _context.Entry(selectedSong).Reference(x => x.Album).LoadAsync();
-                foreach (Song song in viewModel.Songs)
-                {
-                    await _context.Entry(song).Reference(x => x.Album).LoadAsync();
-                }
-                viewModel.Songs = selectedSong.Album.Songs;
+                ViewData["SongID"] = songId.Value;
+                // Yderligere logik kan indsættes her, hvis du ønsker at håndtere valgte sange specifikt.
             }
-     
+
             return View(viewModel);
         }
+
 
         // GET: Albums/Details/5
         public async Task<IActionResult> Details(int? id)
