@@ -20,8 +20,8 @@ namespace Spotify.Models
         // Tilføj bruger-ID for at forbinde til IdentityUser
         public string? UserId { get; set; }
 
-        // Navigationsegenskab
-        public IdentityUser? User { get; set; }
+        //// Navigationsegenskab
+        //public IdentityUser? User { get; set; }
 
     }
 }
