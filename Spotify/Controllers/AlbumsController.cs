@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Spotify.Data;
 using Spotify.Models;
+using Spotify.Models.SpotifyViewModels;
 
 namespace Spotify.Controllers
 {
@@ -20,10 +22,40 @@ namespace Spotify.Controllers
         }
 
         // GET: Albums
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id, int? songId)
         {
-            var spotifyDbContext = _context.Albums.Include(a => a.Artist).Include(a => a.Genre);
-            return View(await spotifyDbContext.ToListAsync());
+            var viewModel = new AlbumIndexData();
+            viewModel.Albums = await _context.Albums
+                .Include(a => a.Artist)
+                .Include(a => a.Genre)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (id != null)
+            {
+                ViewData["Album"] = id.Value;
+                Album album = viewModel.Albums.Where(i => i.AlbumId == id.Value).Single();
+                viewModel.Songs = album.Songs;
+            }
+
+            if (viewModel.Songs == null)
+            {
+                viewModel.Songs = _context.Songs;
+            }
+
+            if (songId != null)
+            {
+                ViewData["SongId"] = songId.Value;
+                var selectedSong = viewModel.Songs.Where(x => x.SongId == songId).Single();
+                await _context.Entry(selectedSong).Reference(x => x.Album).LoadAsync();
+                foreach (Song song in viewModel.Songs)
+                {
+                    await _context.Entry(song).Reference(x => x.Album).LoadAsync();
+                }
+                viewModel.Songs = selectedSong.Album.Songs;
+            }
+     
+            return View(viewModel);
         }
 
         // GET: Albums/Details/5

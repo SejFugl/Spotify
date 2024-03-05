@@ -1,10 +1,10 @@
-﻿@model IEnumerable<Spotify.Models.Album>
+﻿@model Spotify.Models.SpotifyViewModels.AlbumIndexData
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Albums";
 }
 
-<h1>Index</h1>
+<h1>Albums</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -12,27 +12,25 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AlbumArtUrl)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Artist)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Genre)
-            </th>
+            <th>Title</th>
+            <th>Price</th>
+            <th>AlbumArtUrl</th>
+            <th>Artist</th>
+            <th>Genre</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
+@foreach (var item in Model.Albums)
+            {
+            
+                string selectedRow = "";
+                if (item.AlbumId == (int?)ViewData["AlbumId"])
+                {
+                    selectedRow = "table-success";
+                }
+            
+            <tr class="@selectedRow">
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
@@ -49,6 +47,7 @@
                 @Html.DisplayFor(modelItem => item.Genre.Name)
             </td>
             <td>
+                <a asp-action="Index" asp-route-id="@item.AlbumId">Select</a> |
                 <a asp-action="Edit" asp-route-id="@item.AlbumId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.AlbumId">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.AlbumId">Delete</a>
@@ -57,3 +56,36 @@
 }
     </tbody>
 </table>
+
+@if (Model.Albums != null)
+{
+    <h3>Songs in Selected Album</h3>
+    <table class="table">
+        <tr>
+            <th></th>
+            <th>Number</th>
+            <th>Title</th>
+            <th>Department</th>
+        </tr>
+
+        @foreach (var item in Model.Songs)
+        {
+            string selectedRow = "";
+            if (item.SongId == (int?)ViewData["CourseID"])
+            {
+                selectedRow = "success";
+            }
+            <tr class="@selectedRow">
+                <td>
+                    @Html.ActionLink("Select", "Index", new { songID = item.SongId })
+                </td>
+                <td>
+                    @item.SongId
+                </td>
+                <td>
+                    @item.Title
+                </td>
+            </tr>
+        }
+    </table>
+}
