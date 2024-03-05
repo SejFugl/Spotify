@@ -32,7 +32,7 @@
     {
         public static IApplicationBuilder UseAlbumLoggingMiddleware(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<SongLoggingMiddleware>();
+            return builder.UseMiddleware<AlbumLoggingMiddleware>();
         }
     }
 }

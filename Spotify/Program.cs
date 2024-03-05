@@ -46,5 +46,6 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.UseAlbumLoggingMiddleware();
+app.UseSongLoggingMiddleware();
 
 app.Run();
