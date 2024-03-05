@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace Spotify.Models
 {
@@ -14,6 +15,13 @@ namespace Spotify.Models
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public ICollection<PlaylistSong> PlaylistSongs { get; set; }
+        public ICollection<PlaylistSong>? PlaylistSongs { get; set; }
+
+        // Tilføj bruger-ID for at forbinde til IdentityUser
+        public string? UserId { get; set; }
+
+        // Navigationsegenskab
+        public IdentityUser? User { get; set; }
+
     }
 }

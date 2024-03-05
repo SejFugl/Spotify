@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,26 @@ namespace Spotify.Controllers
     public class PlaylistsController : Controller
     {
         private readonly SpotifyDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public PlaylistsController(SpotifyDbContext context)
+        public PlaylistsController(SpotifyDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
+
 
         // GET: Playlists
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Playlists.ToListAsync());
+            var user = await _userManager.GetUserAsync(User);
+            var userId = user?.Id;
+
+            var playlists = userId == null
+                ? new List<Playlist>()
+                : await _context.Playlists.Where(p => p.UserId == userId).ToListAsync();
+
+            return View(playlists);
         }
 
         // GET: Playlists/Details/5
@@ -58,6 +69,13 @@ namespace Spotify.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Tilføj bruger-ID til playlisten
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    playlist.UserId = user.Id;
+                }
+
                 _context.Add(playlist);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
